@@ -4,17 +4,20 @@ USE bill_classification;
 
 CREATE TABLE IF NOT EXISTS unknown_forms (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  source_order_id VARCHAR(128) NOT NULL,
-  source_system VARCHAR(64) NOT NULL,
-  amount DECIMAL(18,2) NOT NULL,
-  form_date VARCHAR(16) NOT NULL,
-  raw_payload JSON NOT NULL,
+  transaction_date VARCHAR(32) NOT NULL,
+  bank VARCHAR(64) NOT NULL,
+  bank_account VARCHAR(128) NOT NULL,
+  flow_type VARCHAR(32) NOT NULL,
+  counterparty_account VARCHAR(128) NOT NULL,
+  transaction_details VARCHAR(512) NOT NULL,
+  withdrawals DECIMAL(18,2) NOT NULL DEFAULT 0,
+  lodgment DECIMAL(18,2) NOT NULL DEFAULT 0,
   status VARCHAR(32) NOT NULL DEFAULT 'pending',
   last_error TEXT NULL,
   version INT NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  KEY idx_unknown_forms_order_id (source_order_id)
+  KEY idx_unknown_forms_bank_account (bank_account)
 );
 
 CREATE TABLE IF NOT EXISTS sync_tasks (

@@ -1,14 +1,19 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class UnknownFormItem(BaseModel):
-    source_order_id: str = Field(min_length=1, max_length=128)
-    source_system: str = Field(min_length=1, max_length=64)
-    amount: float
-    form_date: str
-    raw_payload: dict
+    model_config = ConfigDict(populate_by_name=True)
+
+    transaction_date: str = Field(alias="Transaction Date")
+    bank: str = Field(alias="银行", min_length=1, max_length=64)
+    bank_account: str = Field(alias="银行账户", min_length=1, max_length=128)
+    flow_type: str = Field(alias="收支类型", min_length=1, max_length=32)
+    counterparty_account: str = Field(alias="对方账户", min_length=1, max_length=128)
+    transaction_details: str = Field(alias="Transaction Details", min_length=1, max_length=512)
+    withdrawals: float = Field(alias="Withdrawals", ge=0)
+    lodgment: float = Field(alias="Lodgment", ge=0)
 
 
 class UnknownFormBatchRequest(BaseModel):

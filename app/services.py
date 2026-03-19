@@ -8,14 +8,32 @@ from app.models import ClassificationResult, RetryLog, SyncTask, UnknownForm
 from app.schemas import CallbackRequest, UnknownFormBatchRequest
 
 
+def _to_report_payload(form: UnknownForm) -> dict:
+    """输出给线上报表平台的 JSON 结构，字段名与 Excel 表头一致。"""
+    return {
+        "form_id": form.id,
+        "Transaction Date": form.transaction_date,
+        "银行": form.bank,
+        "银行账户": form.bank_account,
+        "收支类型": form.flow_type,
+        "对方账户": form.counterparty_account,
+        "Transaction Details": form.transaction_details,
+        "Withdrawals": float(form.withdrawals),
+        "Lodgment": float(form.lodgment),
+    }
+
+
 def insert_unknown_forms(db: Session, payload: UnknownFormBatchRequest) -> int:
     rows = [
         UnknownForm(
-            source_order_id=item.source_order_id,
-            source_system=item.source_system,
-            amount=item.amount,
-            form_date=item.form_date,
-            raw_payload=item.raw_payload,
+            transaction_date=item.transaction_date,
+            bank=item.bank,
+            bank_account=item.bank_account,
+            flow_type=item.flow_type,
+            counterparty_account=item.counterparty_account,
+            transaction_details=item.transaction_details,
+            withdrawals=item.withdrawals,
+            lodgment=item.lodgment,
             status="pending",
         )
         for item in payload.items
@@ -33,17 +51,7 @@ def create_export_task(db: Session, limit: int) -> tuple[SyncTask, list[dict]]:
         .limit(limit)
     )
     forms = db.scalars(stmt).all()
-    items = [
-        {
-            "form_id": f.id,
-            "source_order_id": f.source_order_id,
-            "source_system": f.source_system,
-            "amount": float(f.amount),
-            "form_date": f.form_date,
-            "raw_payload": f.raw_payload,
-        }
-        for f in forms
-    ]
+    items = [_to_report_payload(f) for f in forms]
 
     task = SyncTask(task_type="export", status="pushed", payload={"items": items})
     db.add(task)

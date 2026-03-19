@@ -19,11 +19,15 @@ class UnknownForm(Base):
     __tablename__ = "unknown_forms"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
-    source_order_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
-    source_system: Mapped[str] = mapped_column(String(64), nullable=False)
-    amount: Mapped[float] = mapped_column(Numeric(18, 2), nullable=False)
-    form_date: Mapped[str] = mapped_column(String(16), nullable=False)
-    raw_payload: Mapped[dict] = mapped_column(JSON, nullable=False)
+    transaction_date: Mapped[str] = mapped_column(String(32), nullable=False)
+    bank: Mapped[str] = mapped_column(String(64), nullable=False)
+    bank_account: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    flow_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    counterparty_account: Mapped[str] = mapped_column(String(128), nullable=False)
+    transaction_details: Mapped[str] = mapped_column(String(512), nullable=False)
+    withdrawals: Mapped[float] = mapped_column(Numeric(18, 2), nullable=False, default=0)
+    lodgment: Mapped[float] = mapped_column(Numeric(18, 2), nullable=False, default=0)
+
     status: Mapped[str] = mapped_column(String(32), nullable=False, default="pending")
     last_error: Mapped[str | None] = mapped_column(Text)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
